@@ -11,6 +11,7 @@ export interface ControllerMetadata {
 export type Method = 'post' | 'get' | 'patch' | 'put' | 'delete';
 
 export interface ControllerMethodMetadata {
-    method: Method
-    path: string
+    method: Method;
+    path: string;
+    middleware: Middleware[];
 }
