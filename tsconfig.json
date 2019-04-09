@@ -4,7 +4,9 @@
         "lib": [
             "es2015",
         ],
+        "outDir":"./src",
         "module": "commonjs",
+        "declaration":true,
         "baseUrl": "./",
         "paths": {
             "@src/*": [
