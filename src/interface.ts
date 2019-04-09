@@ -4,7 +4,7 @@ export type Middleware = Express.RequestHandler;
 
 export interface ControllerMetadata {
     basePath: string;
-    middleware: Middleware[];
+    // middlewares: Middleware[];
     instance: new () => any;
 }
 
@@ -15,3 +15,5 @@ export interface ControllerMethodMetadata {
     path: string;
     middleware: Middleware[];
 }
+
+export type ControllerMiddlewareMetadata = Array<Middleware>;

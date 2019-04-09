@@ -1,12 +1,13 @@
 import * as Express from 'express';
-import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware } from '@src/interface';
-import { META_DATA } from "@src/constant";
+import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware } from './interface';
+import { META_DATA } from "./constant";
 
-export function Controller(basePath: string, ...middleware: Middleware[]) {
+// export function Controller(basePath: string, middlewares: Middleware[]) {
+export function Controller(basePath: string) {
     return function (target: any) {
 
         const currentMetadata: ControllerMetadata = {
-            middleware,
+            // middlewares,
             basePath,
             instance: new target()
         };
@@ -51,7 +52,7 @@ function resolveRouter(controller: ControllerMetadata) {
             const route = (req:Express.Request, res:Express.Response, next:Express.NextFunction) => {
                 return instance[property](req,res,next);
             };
-            expressRouter[metadata.method](metadata.path, route);            
+            metadata.middleware ? expressRouter[metadata.method](metadata.path, metadata.middleware ,route) : expressRouter[metadata.method](metadata.path, route);
         }
     }
     return expressRouter;
@@ -88,6 +89,17 @@ function httpMethod(method: Method, path?: string, ...middleware: Middleware[]):
         }
         Reflect.defineMetadata(META_DATA.method, currentMetadata, target);
         descriptor.value.metadata = Reflect.getMetadata(META_DATA.method, target);
+        return descriptor;
+    };
+}
+
+export function Middleware(middleware: Array<Middleware>): MethodDecorator {
+    return function(target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor {
+        const originalMethod = descriptor.value;
+        descriptor.value = function(...args: any[]) {
+            return originalMethod.apply(this, args);
+        };
+        descriptor.value.middleware = middleware;
         return descriptor;
     };
 }
