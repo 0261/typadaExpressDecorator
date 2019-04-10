@@ -2,12 +2,11 @@ import * as Express from 'express';
 import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware } from './interface';
 import { META_DATA } from "./constant";
 
-// export function Controller(basePath: string, middlewares: Middleware[]) {
-export function Controller(basePath: string) {
+export function Controller(basePath: string, ...middlewares: Array<Middleware>) {
     return function (target: any) {
 
         const currentMetadata: ControllerMetadata = {
-            // middlewares,
+            middlewares,
             basePath,
             instance: new target()
         };
@@ -26,55 +25,58 @@ export function Controller(basePath: string) {
             newMetadata,
             Reflect
         );
-    }
-}
 
-export function Application(controllers: Array<ControllerMetadata>) {
-    return function(target: any) {
-        const routers = controllers.map( controller => {
-            const router = resolveRouter(controller);
-            return {
-                router,
-                basePath: controller.basePath
-            };
-        });
-        const currentRouterMetadata = routers
-        Reflect.defineMetadata(META_DATA.router, currentRouterMetadata, Reflect);
-    }
-}
-
-function resolveRouter(controller: ControllerMetadata) {
-    const expressRouter = Express.Router();
-    const { instance }  = controller;
-    for(const property in instance) {
-        if( instance[property].metadata) {
-            const metadata = instance[property].metadata;
-            const route = (req:Express.Request, res:Express.Response, next:Express.NextFunction) => {
-                return instance[property](req,res,next);
-            };
-            metadata.middleware ? expressRouter[metadata.method](metadata.path, metadata.middleware ,route) : expressRouter[metadata.method](metadata.path, route);
+        const expressRouter = Express.Router();
+        const controller: ControllerMetadata = Reflect.getMetadata(META_DATA.controller, target);
+        const controllerMiddleware: Array<Middleware> = controller.middlewares;
+        const { instance } = controller;
+        
+        for(const methodName in instance) {
+            // decorated method
+            if(instance[methodName].metadata){
+                const { metadata } = instance[methodName];
+                const callbackFunction = (req:Express.Request, res: Express.Response, next: Express.NextFunction): Express.RequestHandler => {
+                    return instance[methodName](req, res, next);
+                }
+                const routerMiddlewares = metadata.middleware;
+                routerMiddlewares ? expressRouter[metadata.method](metadata.path, routerMiddlewares ,callbackFunction) : expressRouter[metadata.method](metadata.path, callbackFunction);
+            }
         }
+
+        const currentApplicationMetadata = {
+            basePath: controller.basePath,
+            middlewares: controllerMiddleware,
+            router: expressRouter
+        }
+
+        Reflect.defineMetadata(META_DATA.application, currentApplicationMetadata, target);
+        const previousApplicationMetadata = Reflect.getMetadata(
+            META_DATA.application,
+            Reflect
+        ) || [];
+        const newApplicationMetadata = [currentApplicationMetadata, ...previousApplicationMetadata];
+        Reflect.defineMetadata(META_DATA.application, newApplicationMetadata, Reflect);
+        
     }
-    return expressRouter;
 }
 
-export function Get(path?: string, ...middleware: Middleware[]): MethodDecorator {
+export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('get', path, ...middleware);
 }
 
-export function Post(path?: string, ...middleware: Middleware[]): MethodDecorator {
+export function Post(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('post', path, ...middleware);
 }
 
-export function Put(path?: string, ...middleware: Middleware[]): MethodDecorator {
+export function Put(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('put', path, ...middleware);
 }
 
-export function Delete(path?: string, ...middleware: Middleware[]): MethodDecorator {
+export function Delete(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('delete', path, ...middleware);
 }
 
-function httpMethod(method: Method, path?: string, ...middleware: Middleware[]): MethodDecorator {
+function httpMethod(method: Method, path?: string, ...middlewares: Array<Middleware>): MethodDecorator {
 
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
@@ -83,8 +85,8 @@ function httpMethod(method: Method, path?: string, ...middleware: Middleware[]):
             return originalMethod.apply(this, args);
         };        
         const currentMetadata: ControllerMethodMetadata = {
+            middlewares,
             method,
-            middleware,
             path: path ? `/${path}` : ''
         }
         Reflect.defineMetadata(META_DATA.method, currentMetadata, target);
