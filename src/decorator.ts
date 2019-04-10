@@ -38,7 +38,7 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
                 const callbackFunction = (req:Express.Request, res: Express.Response, next: Express.NextFunction): Express.RequestHandler => {
                     return instance[methodName](req, res, next);
                 }
-                const routerMiddlewares = metadata.middleware;
+                const routerMiddlewares = metadata.middlewares;
                 routerMiddlewares ? expressRouter[metadata.method](metadata.path, routerMiddlewares ,callbackFunction) : expressRouter[metadata.method](metadata.path, callbackFunction);
             }
         }
