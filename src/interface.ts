@@ -4,7 +4,7 @@ export type Middleware = Express.RequestHandler;
 
 export interface ControllerMetadata {
     basePath: string;
-    // middlewares: Middleware[];
+    middlewares: Array<Middleware>;
     instance: new () => any;
 }
 
@@ -13,7 +13,7 @@ export type Method = 'post' | 'get' | 'patch' | 'put' | 'delete';
 export interface ControllerMethodMetadata {
     method: Method;
     path: string;
-    middleware: Middleware[];
+    middlewares: Array<Middleware>;
 }
 
 export type ControllerMiddlewareMetadata = Array<Middleware>;
