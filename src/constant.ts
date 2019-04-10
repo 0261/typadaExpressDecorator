@@ -1,5 +1,6 @@
 export const META_DATA =  {
-    controller: '@typada/CTRL',
+    application: '@typada/application',
+    controller: '@typada/controller',
     method: '@typada/method',
     router: '@typada/router',
 }
