@@ -33,7 +33,7 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
         
         for(const methodName in instance) {
             // decorated method
-            if(instance[methodName].metadata){
+            if ( typeof instance[methodName] === 'function') {
                 const { metadata } = instance[methodName];
                 const callbackFunction = (req:Express.Request, res: Express.Response, next: Express.NextFunction): Express.RequestHandler => {
                     return instance[methodName](req, res, next);
