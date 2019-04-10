@@ -1,6 +1,6 @@
 {
   "name": "ts-decorator-express",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Typescript Class, Method Decorator for Expressjs using ReflectMetadata",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,9 +21,16 @@
     "url": "git+https://github.com/0261/typadaExpressDecorator.git"
   },
   "author": "typada",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/0261/typadaExpressDecorator/issues"
+    "url": "https://github.com/0261/typadaExpressDecorator/issues",
+    "email": "bada0113c@gmail.com"
   },
-  "homepage": "https://github.com/0261/typadaExpressDecorator#readme"
+  "keywords": [
+    "express",
+    "decorator",
+    "es6",
+    "typescript",
+    "reflect-metadata"
+  ]
 }
