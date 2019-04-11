@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as Express from 'express';
 import { META_DATA } from "./constant";
-import { ApplicationMethodMetadata } from './interface';
+import { ApplicationMethodMetadata, ProxyInstance } from './interface';
 
 
 class TypadaFactory {
@@ -41,7 +41,7 @@ class TypadaFactory {
                     return `Invalid Property: ${prop} property`;
                 }
             }
-            const proxyInstance = new Proxy(this.app, handler);
+            const proxyInstance = new Proxy(this.app, handler) as ProxyInstance;
             return proxyInstance;
         } catch (error) {
             console.log(error);
