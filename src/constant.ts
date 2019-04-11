@@ -3,4 +3,5 @@ export const META_DATA =  {
     controller: '@typada/controller',
     method: '@typada/method',
     router: '@typada/router',
+    AVAILABLE_EXPRESS_PROPERTY: ['listen', 'locals', 'path', 'set', 'param'],
 }
