@@ -1,5 +1,5 @@
 import * as Express from 'express';
-import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware } from './interface';
+import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata } from './interface';
 import { META_DATA } from "./constant";
 
 export function Controller(basePath: string, ...middlewares: Array<Middleware>) {
@@ -30,7 +30,7 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
         const controller: ControllerMetadata = Reflect.getMetadata(META_DATA.controller, target);
         const controllerMiddleware: Array<Middleware> = controller.middlewares;
         const { instance } = controller;
-        
+
         for(const methodName in instance) {
             // decorated method
             const { metadata } = instance[methodName];
@@ -43,7 +43,7 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
             }
         }
 
-        const currentApplicationMetadata = {
+        const currentApplicationMetadata: ApplicationMethodMetadata = {
             basePath: controller.basePath,
             middlewares: controllerMiddleware,
             router: expressRouter
