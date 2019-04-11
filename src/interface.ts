@@ -17,3 +17,9 @@ export interface ControllerMethodMetadata {
 }
 
 export type ControllerMiddlewareMetadata = Array<Middleware>;
+
+export interface ApplicationMethodMetadata {
+    basePath: string;
+    router: Express.Router;
+    middlewares: Array<Middleware>;
+}
