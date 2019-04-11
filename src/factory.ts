@@ -12,16 +12,17 @@ class TypadaFactory {
         
         const controllers = Reflect.getMetadata(META_DATA.application, Reflect) as Array<ApplicationMethodMetadata>;
 
-        const proxyInstance = this.createProxyInstance();
-
+        
         this.attachedMiddleware(controllers, applicationMiddleware);
-
+        
+        const proxyInstance = this.createProxyInstance();
+        
         return proxyInstance;
     }
     // attachControllerLevelMiddleware
     attachedMiddleware(controllers: Array<ApplicationMethodMetadata>, applicationMiddleware: Array<Express.RequestHandler> = []): boolean {
         try {
-            
+
             if(!controllers) return false;
 
             controllers.map(controller => {
@@ -48,7 +49,7 @@ class TypadaFactory {
                     return `Invalid Property: ${prop} property`;
                 }
             }
-            const proxyInstance = new Proxy(Express(), handler) as ProxyInstance;
+            const proxyInstance = new Proxy(this.app, handler) as ProxyInstance;
             return proxyInstance;
         } catch (error) {
             console.log(error);
