@@ -9,15 +9,21 @@ class TypadaFactory {
         
         const controllers = Reflect.getMetadata(META_DATA.application, Reflect);
         
-        for(const controller of controllers) {
-            const { middlewares } = controller;
-            middlewares.length > 0 ? this.app.use(controller.basePath, ...controller.middlewares, controller.router) : this.app.use(controller.basePath, controller.router);
-        }
-
-        if(middlewares){
-            this.app.use(middlewares)
+        // add middleware to controllers
+        if(controllers){
+            controllers.forEach(controller => {
+                const { middlewares } = controller;
+                middlewares.length > 0 ? this.app.use(controller.basePath, ...controller.middlewares, controller.router) : this.app.use(controller.basePath, controller.router);    
+            })
         }
         
+        // add middleware to express application
+        if(middlewares){
+            middlewares.forEach(middleware => {
+                this.app.use(middleware);
+            })
+        }
+
         return this.app;
     }
 }
