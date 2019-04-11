@@ -31,11 +31,12 @@ class TypadaFactory {
     }
 
     // create Proxy Instance
-    createProxyInstance() {
+    createProxyInstance(): ProxyInstance {
         try {
             const handler = {
                 get: (obj, prop) => {
-                    if(META_DATA.AVAILABLE_EXPRESS_PROPERTY.includes(prop)){
+                    
+                    if(META_DATA.AVAILABLE_EXPRESS_PROPERTY.includes(typeof prop === 'symbol' ? 'do not' : prop)){
                         return obj[prop]
                     }
                     return `Invalid Property: ${prop} property`;
@@ -45,6 +46,7 @@ class TypadaFactory {
             return proxyInstance;
         } catch (error) {
             console.log(error);
+            throw new Error();
         }
     }
 }
