@@ -17,7 +17,7 @@ npm i -D express@4 @types/express typecript
 npm i ts-decorator-express
 ```
 
-> `express` 4 >=, `typescript` 2 >=, `node` 6 >=
+> `express` 4 >=, `typescript` 2 >=, `node` 10 >=
 
 ### tsconfig.json
 ```json
