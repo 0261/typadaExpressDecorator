@@ -116,7 +116,7 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
         const originalMethod = descriptor.value;
         descriptor.value = function() {
             const requiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
-            validateRequiredParameter(requiredParameters, arguments);
+            if(requiredParameters) validateRequiredParameter(requiredParameters, arguments);
             return originalMethod.apply(this, arguments);
         };        
         const currentMetadata: ControllerMethodMetadata = {
