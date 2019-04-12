@@ -158,3 +158,14 @@ export const middle4 = (req: Request, res: Response, next: NextFunction) => {
 
 
 
+
+
+## versioning
+
++ v1.0.20
+    + required decorator 추가
++ v1.0.15
+    + proxy instance 추가
++ v1.0.10
+    + 
+ 
