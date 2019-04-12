@@ -70,23 +70,6 @@ export function Required(target: Object, propertyKey: string | symbol, parameter
     Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
 }
 
-export function Validate() {
-    return function(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
-        let method = descriptor.value as Function;
-        descriptor.value = function () {
-            let requiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyName);
-            if (requiredParameters) {
-                for (let parameterIndex of requiredParameters) {
-                    if (parameterIndex >= arguments.length || arguments[parameterIndex] === undefined) {
-                        throw new Error(`Invalid argument, need required argument.`);
-                    }
-                }
-            }
-            return method.apply(this, arguments);
-        }
-    }
-}
-
 export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('get', path, ...middleware);
 }
@@ -112,8 +95,19 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
         const originalMethod = descriptor.value;
-        descriptor.value = function(...args: any[]) {
-            return originalMethod.apply(this, args);
+        descriptor.value = function() {
+            /**
+             * check requiredParamter
+             */
+            let requiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
+            if (requiredParameters) {
+                for (let parameterIndex of requiredParameters) {
+                    if (parameterIndex >= arguments.length || arguments[parameterIndex] === undefined) {
+                        throw new Error(`Invalid argument, need required argument.`);
+                    }
+                }
+            }
+            return originalMethod.apply(this, arguments);
         };        
         const currentMetadata: ControllerMethodMetadata = {
             middlewares,
