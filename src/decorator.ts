@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import * as Express from 'express';
 import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata } from './interface';
 import { META_DATA } from "./constant";
