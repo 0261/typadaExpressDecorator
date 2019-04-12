@@ -60,6 +60,15 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
     }
 }
 
+export function Required(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+
+    let existingRequiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
+
+    existingRequiredParameters.push(parameterIndex);
+    
+    Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+}
+
 export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('get', path, ...middleware);
 }
@@ -85,8 +94,19 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
         const originalMethod = descriptor.value;
-        descriptor.value = function(...args: any[]) {
-            return originalMethod.apply(this, args);
+        descriptor.value = function() {
+            /**
+             * check requiredParamter
+             */
+            let requiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
+            if (requiredParameters) {
+                for (let parameterIndex of requiredParameters) {
+                    if (parameterIndex >= arguments.length || arguments[parameterIndex] === undefined) {
+                        throw new Error(`Invalid argument, need required argument.`);
+                    }
+                }
+            }
+            return originalMethod.apply(this, arguments);
         };        
         const currentMetadata: ControllerMethodMetadata = {
             middlewares,
