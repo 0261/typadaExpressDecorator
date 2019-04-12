@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as Express from 'express';
 import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata } from './interface';
 import { META_DATA } from "./constant";
@@ -57,6 +58,32 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
         const newApplicationMetadata = [currentApplicationMetadata, ...previousApplicationMetadata];
         Reflect.defineMetadata(META_DATA.application, newApplicationMetadata, Reflect);
         
+    }
+}
+
+export function Required(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+
+    let existingRequiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
+
+    existingRequiredParameters.push(parameterIndex);
+    
+    Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+}
+
+export function Validate() {
+    return function(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
+        let method = descriptor.value as Function;
+        descriptor.value = function () {
+            let requiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyName);
+            if (requiredParameters) {
+                for (let parameterIndex of requiredParameters) {
+                    if (parameterIndex >= arguments.length || arguments[parameterIndex] === undefined) {
+                        throw new Error(`Invalid argument, need required argument.`);
+                    }
+                }
+            }
+            return method.apply(this, arguments);
+        }
     }
 }
 
