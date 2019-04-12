@@ -7,8 +7,10 @@
 
 
 ### Feature
-- Method Decorator( Get, Put, Post, Delete, Patch ) + Middleware
-- Controller Decorator + Middleware
+- Method Decorator( Get, Put, Post, Delete, Patch ) + Method Level Middleware
+- Controller Decorator + Controller Level Middleware
+- Application Level Middleware
+- Required Parameter( >= 1.0.21 )
 
 
 ### Getting Start
@@ -50,8 +52,11 @@ npm i ts-decorator-express
 
 import './src/controllers';
 import { TypadaExpressInstance } from "ts-decorator-express";
+import * as Express from 'express';
 
-const app = TypadaExpressInstance.createInstance();
+const app = TypadaExpressInstance.createInstance([
+    Express.json(), Express.urlencoded({ extended: true }),
+]);
 
 app.listen(3001, () => {
     console.log('Typada Express Decorator Start, ', 3001);
@@ -81,10 +86,10 @@ export class User {
         }
     }
     
-    @Get(':id')
-    async getUser(req, res, next) {
+    @Post('')
+    async createUser(Required('body', ['id']) req, res, next) {
         try {
-            console.log('get User')
+            console.log('create User')
             return res.status(200).json({
                 status:200
             })
@@ -102,6 +107,7 @@ export class User {
  - 첫번 째 인자로 path를 받습니다. 두번 째 인자로 middleware를 받습니다. ( 주의: 첫 path에는 '/'를 사용하지 않습니다. )
  - httpMethod 데코레이터가 붙은 함수는 자동으로 Controller Route에 등록됩니다.
  - path는 express의 path를 따라갑니다. (e.g, :id => /users/1, /users/2, /users/3, :id/order => /users/1/order ..., 정규식도 지원합니다.)
+ - Required 데코레이터는 request에 담겨져있는 값 중 필수값들을 지정하는 데코레이터입니다. 첫번 째 인자는 querystring인지, body인지를 정해주는 path를 설정합니다. 두번 째 인자로 어떤 값을 필수 값으로 지정해 검사할건지 입력합니다. 위 예시는 http://localhost:3000/users에 포스트 요청을 했을 때 body값에 id가 없을 경우 에러가 발생합니다.
 
 ```typescript
 // ./src/controllers/index
