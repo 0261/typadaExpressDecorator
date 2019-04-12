@@ -25,6 +25,12 @@ export interface ApplicationMethodMetadata {
     middlewares: Array<Middleware>;
 }
 
+export interface RequiredParameterMetadata {
+    index: number;
+    path: string;
+    requiredParameters: Array<any>;
+}
+
 
 export interface ProxyInstance {
     listen(port: number, hostname: string, backlog: number, callback?: Function): http.Server;
@@ -37,4 +43,11 @@ export interface ProxyInstance {
     set(setting: string, val: any): Express.Application;
     param(name: string | string[], handler: Express.RequestParamHandler): this;
     param(callback: (name: string, matcher: RegExp) => Express.RequestParamHandler): this;
+}
+
+
+export interface RequestParameter {
+    body: {};
+    query: {};
+    method: string;
 }

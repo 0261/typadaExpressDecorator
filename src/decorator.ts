@@ -1,5 +1,5 @@
 import * as Express from 'express';
-import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata } from './interface';
+import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata, RequestParameter, RequiredParameterMetadata } from './interface';
 import { META_DATA } from "./constant";
 
 export function Controller(basePath: string, ...middlewares: Array<Middleware>) {
@@ -60,13 +60,22 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
     }
 }
 
-export function Required(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+export function Required(path: 'body' | 'query', requiredParameters: Array<string>){
 
-    let existingRequiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
+    return function(target: Object, propertyKey: string | symbol, parameterIndex: number) {
 
-    existingRequiredParameters.push(parameterIndex);
-    
-    Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+        let existingRequiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
+
+        const currentRequiredParameterMetadata: RequiredParameterMetadata = {
+            index: parameterIndex,
+            path,
+            requiredParameters
+        }
+        
+        existingRequiredParameters.push(currentRequiredParameterMetadata);
+        
+        Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+    }
 }
 
 export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
@@ -89,23 +98,25 @@ export function Patch(path?: string, ...middleware: Array<Middleware>): MethodDe
     return httpMethod('patch', path, ...middleware);
 }
 
+export function Middleware(middleware: Array<Middleware>): MethodDecorator {
+    return function(target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor {
+        const originalMethod = descriptor.value;
+        descriptor.value = function(...args: any[]) {
+            return originalMethod.apply(this, args);
+        };
+        descriptor.value.middleware = middleware;
+        return descriptor;
+    };
+}
+
 function httpMethod(method: Method, path?: string, ...middlewares: Array<Middleware>): MethodDecorator {
 
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
         const originalMethod = descriptor.value;
         descriptor.value = function() {
-            /**
-             * check requiredParamter
-             */
-            let requiredParameters: Array<number> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
-            if (requiredParameters) {
-                for (let parameterIndex of requiredParameters) {
-                    if (parameterIndex >= arguments.length || arguments[parameterIndex] === undefined) {
-                        throw new Error(`Invalid argument, need required argument.`);
-                    }
-                }
-            }
+            const requiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
+            validateRequiredParameter(requiredParameters, arguments);
             return originalMethod.apply(this, arguments);
         };        
         const currentMetadata: ControllerMethodMetadata = {
@@ -119,13 +130,18 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
     };
 }
 
-export function Middleware(middleware: Array<Middleware>): MethodDecorator {
-    return function(target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor {
-        const originalMethod = descriptor.value;
-        descriptor.value = function(...args: any[]) {
-            return originalMethod.apply(this, args);
-        };
-        descriptor.value.middleware = middleware;
-        return descriptor;
-    };
+/**
+ * @todo decorator chaining
+ */
+function validateRequiredParameter(requiredParameters: Array<RequiredParameterMetadata>, args) {
+    const { method, query, body } = args[requiredParameters[0].index] as RequestParameter;
+    const required = requiredParameters[0];
+    const valiationPath = method !== 'GET' ? body : query;
+    if(required) {
+        for(const requiredParameter of required.requiredParameters){
+            if(valiationPath[requiredParameter] === undefined){
+                throw new Error(`Invalid argument, need [ ${requiredParameter} ] parameter.`);
+            }
+        }
+    }
 }
