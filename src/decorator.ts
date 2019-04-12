@@ -76,6 +76,10 @@ export function Delete(path?: string, ...middleware: Array<Middleware>): MethodD
     return httpMethod('delete', path, ...middleware);
 }
 
+export function Patch(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+    return httpMethod('patch', path, ...middleware);
+}
+
 function httpMethod(method: Method, path?: string, ...middlewares: Array<Middleware>): MethodDecorator {
 
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
