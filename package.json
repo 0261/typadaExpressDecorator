@@ -1,6 +1,6 @@
 {
   "name": "ts-decorator-express",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Typescript Class, Method Decorator for Expressjs using ReflectMetadata",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -29,8 +29,11 @@
     "email": "bada0113c@gmail.com"
   },
   "keywords": [
+    "Express",
+    "Typescript",
     "express",
     "decorator",
+    "decorators",
     "es6",
     "typescript",
     "reflect-metadata"
