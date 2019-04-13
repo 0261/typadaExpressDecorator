@@ -33,6 +33,8 @@ export interface RequiredParameterMetadata {
 
 
 export interface ProxyInstance {
+    get: Express.IRouterMatcher<this>;
+    post: Express.IRouterMatcher<this>;
     listen(port: number, hostname: string, backlog: number, callback?: Function): http.Server;
     listen(port: number, hostname: string, callback?: Function): http.Server;
     listen(port: number, callback?: Function): http.Server;
