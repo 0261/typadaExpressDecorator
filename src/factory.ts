@@ -20,7 +20,7 @@ class TypadaFactory {
         return proxyInstance;
     }
     // attachControllerLevelMiddleware
-    attachedMiddleware(controllers: Array<ApplicationMethodMetadata>, applicationMiddleware: Array<Express.RequestHandler> = []): boolean {
+    private attachedMiddleware(controllers: Array<ApplicationMethodMetadata>, applicationMiddleware: Array<Express.RequestHandler> = []): boolean {
         try {
 
             if(!controllers) return false;
@@ -39,7 +39,7 @@ class TypadaFactory {
     }
 
     // create Proxy Instance
-    createProxyInstance(): ProxyInstance {
+    private createProxyInstance(): ProxyInstance {
         try {
             const handler = {
                 get: (obj, prop) => {
