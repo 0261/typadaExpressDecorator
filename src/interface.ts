@@ -45,6 +45,10 @@ export interface ProxyInstance {
     param(callback: (name: string, matcher: RegExp) => Express.RequestParamHandler): this;
 }
 
+export interface ProxyOptions {
+    proxy: boolean;
+}
+
 
 export interface RequestParameter {
     body: {};

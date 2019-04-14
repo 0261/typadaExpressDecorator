@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as Express from 'express';
 import { META_DATA } from "./constant";
-import { ApplicationMethodMetadata, ProxyInstance } from './interface';
+import { ApplicationMethodMetadata, ProxyInstance, ProxyOptions } from './interface';
 
 
 class TypadaFactory {
@@ -39,18 +39,24 @@ class TypadaFactory {
     }
 
     // create Proxy Instance
-    private createProxyInstance(): ProxyInstance {
+    private createProxyInstance(option:ProxyOptions = { proxy: true }) {
         try {
-            const handler = {
-                get: (obj, prop) => {
-                    if(META_DATA.AVAILABLE_EXPRESS_PROPERTY.includes(typeof prop === 'symbol' ? 'do not' : prop)){
-                        return obj[prop]
+            let instance:Express.Application | ProxyInstance;
+            if(option.proxy) {
+                const handler = {
+                    get: (obj, prop) => {
+                        if(META_DATA.AVAILABLE_EXPRESS_PROPERTY.includes(typeof prop === 'symbol' ? 'do not' : prop)){
+                            return obj[prop]
+                        }
+                        return `Invalid Property: ${prop} property`;
                     }
-                    return `Invalid Property: ${prop} property`;
                 }
+                instance = new Proxy(this.app, handler) as ProxyInstance;
+            } else {
+                instance = this.app;
             }
-            const proxyInstance = new Proxy(this.app, handler) as ProxyInstance;
-            return proxyInstance;
+            
+            return instance;
         } catch (error) {
             console.log(error);
             throw new Error();
