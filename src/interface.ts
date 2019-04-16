@@ -55,3 +55,13 @@ export interface RequestParameter {
     query: {};
     method: string;
 }
+
+export interface ValidationDecorator {
+    Body(values: Array<string>, ): ValidationDecorator & ParameterDecorator;
+    Query(values: Array<string>, ): ValidationDecorator & ParameterDecorator;
+}
+
+export interface ExistingRequiredParameters {
+    query: Array<string>;
+    body: Array<string>;
+}

@@ -1,5 +1,5 @@
 import * as Express from 'express';
-import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata, RequestParameter, RequiredParameterMetadata } from './interface';
+import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata, RequestParameter, RequiredParameterMetadata, ExistingRequiredParameters, ValidationDecorator } from './interface';
 import { META_DATA } from "./constant";
 
 export function Controller(basePath: string, ...middlewares: Array<Middleware>) {
@@ -60,24 +60,6 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
     }
 }
 
-export function Required(path: 'body' | 'query', requiredParameters: Array<string>){
-
-    return function(target: Object, propertyKey: string | symbol, parameterIndex: number) {
-
-        let existingRequiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
-
-        const currentRequiredParameterMetadata: RequiredParameterMetadata = {
-            index: parameterIndex,
-            path,
-            requiredParameters
-        }
-        
-        existingRequiredParameters.push(currentRequiredParameterMetadata);
-        
-        Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
-    }
-}
-
 export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('get', path, ...middleware);
 }
@@ -115,7 +97,7 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
 
         const originalMethod = descriptor.value;
         descriptor.value = function() {
-            const requiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
+            const requiredParameters: Array<ExistingRequiredParameters> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
             if(requiredParameters) validateRequiredParameter(requiredParameters, arguments);
             return originalMethod.apply(this, arguments);
         };        
@@ -130,18 +112,56 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
     };
 }
 
+
+let existingRequiredParameters = {};
+const validationDecoratorFactory = (path : 'query' | 'body' , requiredParameters: Array<string>, maps: ExistingRequiredParameters = { query:[], body:[]}): ValidationDecorator & ParameterDecorator => {
+    maps[path] = requiredParameters;
+    const validationDecoratorFunction = (target: Function, propertyKey: string | symbol, parameterIndex: number): void => {
+        existingRequiredParameters[parameterIndex] = maps;
+        Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+    };
+
+    validationDecoratorFunction.Body  = (requiredParameters: Array<string>) => validationDecoratorFactory('body' , requiredParameters, maps);
+    validationDecoratorFunction.Query = (requiredParameters: Array<string>) => validationDecoratorFactory('query', requiredParameters, maps);
+    return validationDecoratorFunction;
+}
 /**
  * @todo decorator chaining
  */
-function validateRequiredParameter(requiredParameters: Array<RequiredParameterMetadata>, args) {
-    const { method, query, body } = args[requiredParameters[0].index] as RequestParameter;
-    const required = requiredParameters[0];
-    const valiationPath = method !== 'GET' ? body : query;
-    if(required) {
-        for(const requiredParameter of required.requiredParameters){
-            if(valiationPath[requiredParameter] === undefined){
-                throw new Error(`Invalid argument, need [ ${requiredParameter} ] parameter.`);
-            }
-        }
+export const Required: ValidationDecorator = {
+    Body : (values: Array<string>) => validationDecoratorFactory('body' , values),
+    Query: (values: Array<string>) => validationDecoratorFactory('query', values)
+}
+
+function validateRequiredParameter(requiredParameters:Array<ExistingRequiredParameters>, requestedParameters: any) {
+    const rqrParameters:ExistingRequiredParameters = requiredParameters[0];
+    const { query, body } = requestedParameters[0] as Express.Request;
+    if(query) {
+        Object.values(rqrParameters['query']).map((value) => {
+            if(!Object.keys(query).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['query'])} ]`)
+        })
+    }
+    if(body) {
+        Object.values(rqrParameters['body']).map((value) => {
+            if(!Object.keys(body).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['body'])} ]`)
+        })
     }
 }
+
+// deprecated on 1.0.28
+// export function Required(path: 'body' | 'query', requiredParameters: Array<string>){
+//     return function(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+//         let existingRequiredParameters: Array<RequiredParameterMetadata> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey) || [];
+//         const currentRequiredParameterMetadata: RequiredParameterMetadata = {
+//             index: parameterIndex,
+//             path,
+//             requiredParameters
+//         }
+//         existingRequiredParameters.push(currentRequiredParameterMetadata);
+//         Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
+//     }
+// }
+
+
+
+
