@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as Express from 'express';
 import { ControllerMetadata, ControllerMethodMetadata, Method, Middleware, ApplicationMethodMetadata, RequestParameter, RequiredParameterMetadata, ExistingRequiredParameters, ValidationDecorator } from './interface';
 import { META_DATA } from "./constant";
@@ -98,7 +99,7 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
         const originalMethod = descriptor.value;
         descriptor.value = function() {
             const requiredParameters: Array<ExistingRequiredParameters> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
-            if(requiredParameters) validateRequiredParameter(requiredParameters, arguments);
+            if(requiredParameters) validateRequiredParameter(requiredParameters, propertyKey, arguments);
             return originalMethod.apply(this, arguments);
         };        
         const currentMetadata: ControllerMethodMetadata = {
@@ -133,17 +134,17 @@ export const Required: ValidationDecorator = {
     Query: (values: Array<string>) => validationDecoratorFactory('query', values)
 }
 
-function validateRequiredParameter(requiredParameters:Array<ExistingRequiredParameters>, requestedParameters: any) {
-    const rqrParameters:ExistingRequiredParameters = requiredParameters[0];
+function validateRequiredParameter(requiredParameters:Array<ExistingRequiredParameters>, propertyKey, requestedParameters: any) {
+    const rqrParameters:ExistingRequiredParameters = requiredParameters[propertyKey];
     const { query, body } = requestedParameters[0] as Express.Request;
     if(query) {
         Object.values(rqrParameters['query']).map((value) => {
-            if(!Object.keys(query).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['query'])} ]`).message
+            if(!Object.keys(query).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['query'])} ] in querystring`).message
         })
     }
     if(body) {
         Object.values(rqrParameters['body']).map((value) => {
-            if(!Object.keys(body).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['body'])} ]`).message
+            if(!Object.keys(body).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['body'])} ] in request body`).message
         })
     }
 }
