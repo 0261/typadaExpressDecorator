@@ -138,12 +138,12 @@ function validateRequiredParameter(requiredParameters:Array<ExistingRequiredPara
     const { query, body } = requestedParameters[0] as Express.Request;
     if(query) {
         Object.values(rqrParameters['query']).map((value) => {
-            if(!Object.keys(query).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['query'])} ]`)
+            if(!Object.keys(query).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['query'])} ]`).message
         })
     }
     if(body) {
         Object.values(rqrParameters['body']).map((value) => {
-            if(!Object.keys(body).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['body'])} ]`)
+            if(!Object.keys(body).includes(value)) throw new Error(`Invalid argument, we need [ ${Object.values(rqrParameters['body'])} ]`).message
         })
     }
 }
