@@ -118,7 +118,7 @@ let existingRequiredParameters = {};
 const validationDecoratorFactory = (path : 'query' | 'body' , requiredParameters: Array<string>, maps: ExistingRequiredParameters = { query:[], body:[]}): ValidationDecorator & ParameterDecorator => {
     maps[path] = requiredParameters;
     const validationDecoratorFunction = (target: Function, propertyKey: string | symbol, parameterIndex: number): void => {
-        existingRequiredParameters[parameterIndex] = maps;
+        existingRequiredParameters[propertyKey] = maps;
         Reflect.defineMetadata(META_DATA.parameter, existingRequiredParameters, target, propertyKey);
     };
 
