@@ -87,7 +87,7 @@ export class User {
     }
     
     @Post('')
-    async createUser(Required('body', ['id']) req, res, next) {
+    async createUser(@Required.Body(['password']).Query(['id', 'email']) req, res, next) {
         try {
             console.log('create User')
             return res.status(200).json({
@@ -96,7 +96,7 @@ export class User {
         } catch (error) {
             console.log(error);
         }
-    }
+    }    
 }
 ```
  - Controller 클래스를 생성합니다. TypadaExpressInstance에 Controller 클래스를 등록하기 위해 Controller 데코레이터를 사용합니다.
@@ -107,7 +107,10 @@ export class User {
  - 첫번 째 인자로 path를 받습니다. 두번 째 인자로 middleware를 받습니다. ( 주의: 첫 path에는 '/'를 사용하지 않습니다. )
  - httpMethod 데코레이터가 붙은 함수는 자동으로 Controller Route에 등록됩니다.
  - path는 express의 path를 따라갑니다. (e.g, :id => /users/1, /users/2, /users/3, :id/order => /users/1/order ..., 정규식도 지원합니다.)
- - Required 데코레이터는 request에 담겨져있는 값 중 필수값들을 지정하는 데코레이터입니다. 첫번 째 인자는 querystring인지, body인지를 정해주는 path를 설정합니다. 두번 째 인자로 어떤 값을 필수 값으로 지정해 검사할건지 입력합니다. 위 예시는 http://localhost:3000/users에 포스트 요청을 했을 때 body값에 id가 없을 경우 에러가 발생합니다.
+ - Required 데코레이터는 request에 담겨져있는 값 중 필수값들을 지정하는 데코레이터입니다. Required 데코레이터는 Body함수와 Query함수를 이용해 사용가능합니다. Body함수는 문자열 배열을 인수로 받습니다. Request Body안에 인수로 넣은 문자열이 없을 경우 에러를 호출합니다.
+ - 위의 예시는 /users로 Post요청했을 경우 QueryString에 id와 email을 필수 값으로 지정하고 Request Body에 password를 필수 값으로 지정한 예시입니다.
+ - 참고 @Required.Body(['123']).Body(['456']).Body(['789']).Query(['000']).Body(...).Query(...).Query(...).Body(['564'
+ ]).Query(['092']) ...처럼 무한히 체이닝 할 경우 마지막 값만 적용됩니다.
 
 ```typescript
 // ./src/controllers/index
