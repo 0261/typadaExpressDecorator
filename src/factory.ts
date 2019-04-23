@@ -8,14 +8,14 @@ class TypadaFactory {
 
     private readonly app: Express.Application = Express();
 
-    createInstance(applicationMiddleware: Array<Express.RequestHandler> = []): ProxyInstance {
+    createInstance(applicationMiddleware: Array<Express.RequestHandler> = [], options?:ProxyOptions): ProxyInstance {
         
         const controllers = Reflect.getMetadata(META_DATA.application, Reflect) as Array<ApplicationMethodMetadata>;
 
         
         this.attachedMiddleware(controllers, applicationMiddleware);
         
-        const proxyInstance = this.createProxyInstance();
+        const proxyInstance = this.createProxyInstance(options);
         
         return proxyInstance;
     }
