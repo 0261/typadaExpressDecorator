@@ -170,7 +170,11 @@ export const middle4 = (req: Request, res: Response, next: NextFunction) => {
 
 
 ## versioning
-
++ v1.0.32
+    + add Regexp Route 추가
+        + @Get(/d/) 지원
++ v1.0.28
+    + add required Chaning 추가
 + v1.0.20
     + required decorator 추가
 + v1.0.15
