@@ -1,11 +1,9 @@
-typadaExpressDecorator
+## typadaExpressDecorator
 
-What is it ?
-
+### What is it ?
 - Typescript + ES6 + Decorator + Express = ts-decorator-express
 
-Feature
-
+### Feature
 - Method Decorator( Get, Put, Post, Delete, Patch ) + Method Level Middleware
 - Controller Decorator + Controller Level Middleware
 - Application Level Middleware
@@ -13,151 +11,160 @@ Feature
 - Required Channing
 - Regexp Route
 
-Getting Start
 
-    npm i -D express@4 @types/express typecript
-    npm i ts-decorator-express
+### Getting Start
+```sh
+npm i -D express@4 @types/express typecript
+npm i ts-decorator-express
+```
 
-express 4 >=, typescript 2 >=, node 10 >=
+> `express` 4 >=, `typescript` 2 >=, `node` 10 >=
 
-tsconfig.json
+### tsconfig.json
+```json
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "es2015",
+        ],
+        "types": ["reflect-metadata"],
+        "module": "commonjs",
+        "baseUrl": "./",
+        "strictNullChecks": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
+```
 
-    {
-        "compilerOptions": {
-            "target": "es5",
-            "lib": [
-                "es2015",
-            ],
-            "types": ["reflect-metadata"],
-            "module": "commonjs",
-            "baseUrl": "./",
-            "strictNullChecks": true,
-            "moduleResolution": "node",
-            "experimentalDecorators": true,
-            "emitDecoratorMetadata": true,
-        },
-        "exclude": [
-            "node_modules"
-        ]
-    }
 
 
+## Example
 
-Example
+```typescript
+// ./server.ts
 
-    // ./server.ts
+import './src/controllers';
+import { TypadaExpressInstance } from "ts-decorator-express";
+import * as Express from 'express';
+
+const app = TypadaExpressInstance.createInstance([
+    Express.json(), Express.urlencoded({ extended: true }),
+]);
+
+app.listen(3001, () => {
+    console.log('Typada Express Decorator Start, ', 3001);
+});
+```
+
+```typescript
+// ./src/controllers/users
+import { Controller, Get } from "ts-decorator-express";
+import { middle1, middle2, middle3 } from "../middlewares";
+
+@Controller('/users', middle1, middle2, middle3)
+export class User {
     
-    import './src/controllers';
-    import { TypadaExpressInstance } from "ts-decorator-express";
-    import * as Express from 'express';
-    
-    const app = TypadaExpressInstance.createInstance([
-        Express.json(), Express.urlencoded({ extended: true }),
-    ]);
-    
-    app.listen(3001, () => {
-        console.log('Typada Express Decorator Start, ', 3001);
-    });
-
-    // ./src/controllers/users
-    import { Controller, Get } from "ts-decorator-express";
-    import { middle1, middle2, middle3 } from "../middlewares";
-    
-    @Controller('/users', middle1, middle2, middle3)
-    export class User {
-        
-        @Get('', middle1, middle2 ,middle3)
-        async getUsers(req, res, next) {
-            try {
-                console.log('get Users')
-                return res.status(200).json({
-                    status:200
-                })
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        
-        @Get(/\d/)
-        async getUserById(req, res, next) {
-            try{
-             	console.log('get User By Id');
-                return res.status(200).json({
-                    status:200
-                })            
-            } catch (error) {
-                console.log(error);            
-            }        
-    	}
-        
-        @Post('')
-        async createUser(@Required.Body(['password']).Query(['id', 'email']) req, res, next) {
-            try {
-                console.log('create User')
-                return res.status(200).json({
-                    status:200
-                })
-            } catch (error) {
-                console.log(error);
-            }
-        }    
-    }
-
-    // ./src/controllers/index
-    import './user';
-
-    import { Request, Response, NextFunction } from "express";
-    
-    export const middle1 = (req: Request, res: Response, next: NextFunction) => {
+    @Get('', middle1, middle2 ,middle3)
+    async getUsers(req, res, next) {
         try {
-            console.log('middle1');
-            next();
+            console.log('get Users')
+            return res.status(200).json({
+                status:200
+            })
         } catch (error) {
             console.log(error);
         }
     }
-    export const middle2 = (req: Request, res: Response, next: NextFunction) => {
+    
+    @Get(/\d/)
+    async getUserById(req, res, next) {
+        try{
+         	console.log('get User By Id');
+            return res.status(200).json({
+                status:200
+            })            
+        } catch (error) {
+            console.log(error);            
+        }        
+	}
+    
+    @Post('')
+    async createUser(@Required.Body(['password']).Query(['id', 'email']) req, res, next) {
         try {
-            console.log('middle2');
-            next();
+            console.log('create User')
+            return res.status(200).json({
+                status:200
+            })
         } catch (error) {
             console.log(error);
         }
+    }    
+}
+```
+```typescript
+// ./src/controllers/index
+import './user';
+```
+
+```typescript
+import { Request, Response, NextFunction } from "express";
+
+export const middle1 = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('middle1');
+        next();
+    } catch (error) {
+        console.log(error);
     }
-    export const middle3 = (req: Request, res: Response, next: NextFunction) => {
-        try {
-            console.log('middle3');
-            next();
-        } catch (error) {
-            console.log(error);
-        }
+}
+export const middle2 = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('middle2');
+        next();
+    } catch (error) {
+        console.log(error);
     }
-    export const middle4 = (req: Request, res: Response, next: NextFunction) => {
-        try {
-            console.log('middle4');
-            next();
-        } catch (error) {
-            console.log(error);
-        }
+}
+export const middle3 = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('middle3');
+        next();
+    } catch (error) {
+        console.log(error);
     }
+}
+export const middle4 = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('middle4');
+        next();
+    } catch (error) {
+        console.log(error);
+    }
+}
+```
 
-Result
 
-http://localhost:3001/users
+## Result
+
+`http://localhost:3001/users`
 
 
 
-Versioning
-
-- v1.0.32
-  - add Regexp Route
-- v1.0.28
-  - add required Chaning
-- v1.0.20
-  - required decorator
-- v1.0.15
-  - proxy instance
-- v1.0.10
-  - 
-
+## Versioning
++ v1.0.32
+    + add Regexp Route
++ v1.0.28
+    + add required Chaning
++ v1.0.20
+    + required decorator
++ v1.0.15
+    + proxy instance
++ v1.0.10
+    + 
 
