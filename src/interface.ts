@@ -13,7 +13,7 @@ export type Method = 'post' | 'get' | 'patch' | 'put' | 'delete';
 
 export interface ControllerMethodMetadata {
     method: Method;
-    path: string;
+    path?: string | RegExp;
     middlewares: Array<Middleware>;
 }
 

@@ -61,23 +61,23 @@ export function Controller(basePath: string, ...middlewares: Array<Middleware>) 
     }
 }
 
-export function Get(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+export function Get(path?: string | RegExp, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('get', path, ...middleware);
 }
 
-export function Post(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+export function Post(path?: string | RegExp, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('post', path, ...middleware);
 }
 
-export function Put(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+export function Put(path?: string | RegExp, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('put', path, ...middleware);
 }
 
-export function Delete(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+export function Delete(path?: string | RegExp, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('delete', path, ...middleware);
 }
 
-export function Patch(path?: string, ...middleware: Array<Middleware>): MethodDecorator {
+export function Patch(path?: string | RegExp, ...middleware: Array<Middleware>): MethodDecorator {
     return httpMethod('patch', path, ...middleware);
 }
 
@@ -92,7 +92,7 @@ export function Middleware(middleware: Array<Middleware>): MethodDecorator {
     };
 }
 
-function httpMethod(method: Method, path?: string, ...middlewares: Array<Middleware>): MethodDecorator {
+function httpMethod(method: Method, path?: string | RegExp, ...middlewares: Array<Middleware>): MethodDecorator {
 
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
@@ -101,11 +101,17 @@ function httpMethod(method: Method, path?: string, ...middlewares: Array<Middlew
             const requiredParameters: Array<ExistingRequiredParameters> = Reflect.getOwnMetadata(META_DATA.parameter, target, propertyKey);
             if(requiredParameters) validateRequiredParameter(requiredParameters, propertyKey, arguments);
             return originalMethod.apply(this, arguments);
-        };        
+        };
+        // add Regexp Route
+        if(path) {
+            path = typeof(path) === 'object' ? path : `/${path}`
+        } else {
+            path = ''
+        }
         const currentMetadata: ControllerMethodMetadata = {
             middlewares,
             method,
-            path: path ? `/${path}` : ''
+            path,
         }
         Reflect.defineMetadata(META_DATA.method, currentMetadata, target);
         descriptor.value.metadata = Reflect.getMetadata(META_DATA.method, target);
