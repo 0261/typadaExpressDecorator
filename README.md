@@ -8,8 +8,8 @@
 - Controller Decorator + Controller Level Middleware
 - Application Level Middleware
 - Required Parameter( >= 1.0.21 )
-- Required Channing
-- Regexp Route
+- Required Channing ( >= 1.0.28)
+- Regexp Route ( >= 1.0.32)
 
 
 ### Getting Start
