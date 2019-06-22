@@ -7,7 +7,7 @@
 - Method Decorator( Get, Put, Post, Delete, Patch ) + Method Level Middleware
 - Controller Decorator + Controller Level Middleware
 - Application Level Middleware
-- Required Parameter( >= 1.0.21 )
+- Required Parameter( >= 1.0.21)
 - Required Channing ( >= 1.0.28)
 - Regexp Route ( >= 1.0.32)
 
